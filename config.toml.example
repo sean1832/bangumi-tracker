@@ -1,0 +1,24 @@
+[settings]
+pull_interval_sec = 300 # how often to check for new episodes in seconds
+
+[qbittorrent]
+host = "localhost"
+port = 8080
+username = "admin"
+password = "password"
+save_path_root = "/mnt/nas/Media/animes" # where your plex server is looking for files
+category = "anime"
+
+
+[[shows]]
+title = "your title"
+url = "https://xxx"
+season = 1
+exclude_patterns = ["720"]  # regex patterns to exclude
+
+# (optional) defaults "anime"
+#category = "anime" 
+
+
+# [[shows]]
+# more...

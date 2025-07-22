@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61.0", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bangumi-tracker"
+dynamic = ["version"]
+requires-python = ">=3.11"
+dependencies = [
+    "feedparser==6.0.11",
+    "qbittorrent-api==2025.7.0",
+    "python-dotenv==1.1.1",
+    "tomli",
+    "bencodepy",
+]
+description = "track anime RSS, download using qbittorent and rename for plex"
+
+[project.scripts]
+bangumi-tracker = "bangumi_tracker.cli:main"
+
+[tool.setuptools.dynamic.version]
+attr = "bangumi_tracker.__version__"
