@@ -31,6 +31,8 @@ tmux new -s bangumi-tracker
 bangumi-tracker --config config.toml
 ```
 > To detach from the session, press `Ctrl+b`, then `d`. To reattach, use `tmux attach -t bangumi-tracker`.
+>
+> To kill the session, use `tmux kill-session -t bangumi-tracker`.
 
 ### Usage with `cron`
 You can set up a cron job to run the tracker periodically. For example, to run it every hour:
