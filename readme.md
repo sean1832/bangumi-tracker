@@ -19,7 +19,6 @@ cp config.toml.example config.toml
 bangumi-tracker [Args]
 ```
 - `--config`: Path to the config file (default: `config.toml`).
-- `--debug`: Enable debug logging.
 - `-h`, `--help`: Show help message and exit.
 - `-v`, `--version`: Show version information and exit.
 
@@ -46,6 +45,8 @@ Edit `config.toml` to add your RSS feeds and qBittorrent settings. The configura
 ```toml
 [settings]
 pull_interval_sec = 300 # how often to check for new episodes in seconds
+log_dir = "~/logs" # log directory. It will save as log/yyyy-mm-dd.log
+log_level = "INFO" # log level, can be DEBUG, INFO, WARNING, ERROR, CRITICAL
 
 [qbittorrent]
 host = "localhost"

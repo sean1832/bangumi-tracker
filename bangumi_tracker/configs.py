@@ -1,5 +1,7 @@
+import logging
 from dataclasses import dataclass
-from typing import List
+from pathlib import Path
+from typing import List, Literal
 
 
 @dataclass
@@ -25,6 +27,8 @@ class BangumiConfig:
     qbittorrent: QbittorrentConfig
     shows: List[ShowConfig]
     pull_interval_sec: int
+    log_dir: Path
+    log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 
 
 def load_config(config_data: dict) -> BangumiConfig:
@@ -49,9 +53,17 @@ def load_config(config_data: dict) -> BangumiConfig:
     pull_interval = config_data["settings"].get(
         "pull_interval_sec", 1800
     )  # Default to 30 minutes if not specified
+    log_dir = Path(config_data["settings"].get("log_dir", "~/logs"))
+    log_dir = log_dir.expanduser().resolve()
+
+    log_level = config_data["settings"].get("log_level", "INFO").upper()
+    if log_level not in logging._nameToLevel:
+        raise ValueError(f"Invalid log level: {log_level}")
 
     return BangumiConfig(
         qbittorrent=qbittorrent_config,
         shows=shows,
         pull_interval_sec=pull_interval,
+        log_dir=log_dir,
+        log_level=log_level,
     )

@@ -19,16 +19,17 @@ from bangumi_tracker.rss import RssFeed
 from bangumi_tracker.torrent import TorrentFetcher
 
 
-def configure_logging(dir: Path, debug: bool) -> None:
+def configure_logging(config: BangumiConfig) -> None:
     # Ensure your log directory exists
+    dir = config.log_dir
     dir.mkdir(parents=True, exist_ok=True)
 
     # Compute today’s filename
     date_str = datetime.now().strftime("%Y-%m-%d")
-    log_path = dir / f"{date_str}.log"
+    log_path = dir / f"bangumi.{date_str}.log"
 
     # Pick your level
-    level = logging.DEBUG if debug else logging.INFO
+    level = getattr(logging, config.log_level.upper(), logging.INFO)
 
     # Create handlers
     handlers = []  #  type is list[Any], so you can mix handlers
@@ -52,11 +53,6 @@ def parse_args():
         type=str,
         help="Path to the configuration file. must be toml format.",
         required=True,
-    )
-    parser.add_argument(
-        "--debug",
-        action="store_true",
-        help="Enable debug logging",
     )
     return parser.parse_args()
 
@@ -119,7 +115,7 @@ def operation(
             episodes_to_download.append(episode)
 
     if not episodes_to_download:
-        logger.warning("No new episodes found")
+        logger.debug("No new episodes found")
 
     # send new episodes to qBittorrent
     for episode in episodes_to_download:
@@ -146,41 +142,57 @@ def operation(
             return
 
 
+def get_config(config_path: str) -> BangumiConfig:
+    """Load the configuration from a TOML file.
+
+    Args:
+        config_path (str): Path to the configuration file.
+
+    Returns:
+        BangumiConfig: The loaded configuration object.
+    """
+    try:
+        with open(config_path, "rb") as f:
+            config_raw = tomllib.load(f)
+        logger.debug(f"Configuration loaded: {config_raw}")
+        return load_config(config_raw)
+    except Exception as e:
+        logger.error(f"Failed to load configuration file: {e}")
+        raise
+
+
 def main():
     args = parse_args()
-    configure_logging(Path("logs"), args.debug)
+
+    # initial configuration
+    config = get_config(args.config)
+    configure_logging(config=config)
 
     logger.info(f"Starting Bangumi Tracker CLI version {__version__}")
     logger.debug(f"Using configuration file: {args.config}")
-    try:
-        with open(args.config, "rb") as f:
-            config_raw = tomllib.load(f)
-        logger.debug(f"Configuration loaded: {config_raw}")
-    except Exception as e:
-        logger.error(f"Failed to load configuration file: {e}")
-        return
-    config = load_config(config_raw)
-    logger.info("Configuration loaded successfully")
-
-    # Initialize qBittorrent client
-    try:
-        client = qbittorrentapi.Client(
-            host=config.qbittorrent.host,
-            port=config.qbittorrent.port,
-            username=config.qbittorrent.username,
-            password=config.qbittorrent.password,
-        )
-        client.auth_log_in()
-        logger.info("Connected to qBittorrent successfully")
-    except qbittorrentapi.LoginFailed as e:
-        logger.error(f"Failed to connect to qBittorrent: {e}")
-        return
 
     # initialize torrent fetcher session
     session = requests.Session()
     torrent_fetcher = TorrentFetcher(session=session)
     try:
         while True:
+            config = get_config(args.config)
+            logger.info("Configuration loaded successfully")
+
+            # Initialize qBittorrent client
+            try:
+                client = qbittorrentapi.Client(
+                    host=config.qbittorrent.host,
+                    port=config.qbittorrent.port,
+                    username=config.qbittorrent.username,
+                    password=config.qbittorrent.password,
+                )
+                client.auth_log_in()
+                logger.info("Connected to qBittorrent successfully")
+            except qbittorrentapi.LoginFailed as e:
+                logger.error(f"Failed to connect to qBittorrent: {e}")
+                return
+
             try:
                 operation(config, client, torrent_fetcher)
             except Exception as e:
