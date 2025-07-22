@@ -49,10 +49,9 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Bangumi Tracker CLI")
     parser.add_argument("--version", action="version", version=f"Bangumi Tracker {__version__}")
     parser.add_argument(
-        "--config",
+        "config",
         type=str,
         help="Path to the configuration file. must be toml format.",
-        required=True,
     )
     return parser.parse_args()
 
@@ -115,7 +114,7 @@ def operation(
             episodes_to_download.append(episode)
 
     if not episodes_to_download:
-        logger.debug("No new episodes found")
+        logger.info("No new episodes found.")
 
     # send new episodes to qBittorrent
     for episode in episodes_to_download:

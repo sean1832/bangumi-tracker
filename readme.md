@@ -16,9 +16,8 @@ cp config.toml.example config.toml
 ## Usage
 
 ```bash
-bangumi-tracker [Args]
+bangumi-tracker [config.toml] [Args]
 ```
-- `--config`: Path to the config file (default: `config.toml`).
 - `-h`, `--help`: Show help message and exit.
 - `-v`, `--version`: Show version information and exit.
 
@@ -27,7 +26,7 @@ You can run the tracker in a `tmux` session to keep it running in the background
 
 ```bash
 tmux new -s bangumi-tracker
-bangumi-tracker --config config.toml
+bangumi-tracker config.toml
 ```
 > To detach from the session, press `Ctrl+b`, then `d`. To reattach, use `tmux attach -t bangumi-tracker`.
 >
@@ -37,7 +36,7 @@ bangumi-tracker --config config.toml
 You can set up a cron job to run the tracker periodically. For example, to run it every hour:
 
 ```bash
-0 * * * * /path/to/bangumi-tracker --config /path/to/config.toml
+0 * * * * /path/to/bangumi-tracker /path/to/config.toml
 ```
 ## Configuration
 Edit `config.toml` to add your RSS feeds and qBittorrent settings. The configuration file should look like this:
